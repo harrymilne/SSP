@@ -128,11 +128,6 @@ class SSP:
                 return best
         return best
 
-
-    def binary_tree(self):
-        tree = {[]:{}}
-
-
     def dynamic(self):
         """
         return True or False to whether a subset sums to the target via dynamic programming
@@ -146,11 +141,11 @@ class SSP:
         print("dynamic: completed in {} iterations".format(it))
         return self.t in L
 
-
-instance = SSP()
-instance.random_yes_instance(50)
-print(instance)
-print(instance.grasp())
+if __name__ == "__main__":
+    instance = SSP()
+    instance.random_yes_instance(50)
+    print(instance)
+    print(instance.grasp())
 # print( instance )
 # print(instance.greedy())
 # print(instance.dynamic())
