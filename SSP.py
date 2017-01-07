@@ -79,7 +79,6 @@ class SSP:
     def greedy(self, rand=False):
         total = []
         copy = self.S.copy()
-        #print(copy)
 
         if rand:
             shuffle(copy)
@@ -89,7 +88,6 @@ class SSP:
                 copy.remove(x)
 
         while copy and sum(total) < self.t:
-            print(total)
             for i in copy:
                 if i + sum(total) <= self.t:
                     total.append(i)
@@ -122,9 +120,10 @@ class SSP:
             greedy = self.greedy(True)
             grasp = self.local_search(greedy[1])
             if self.distance(grasp) < self.distance(best):
-                print(f'')
+                print("GRASP: found better solution: {}".format(grasp))
                 best = grasp
             if sum(best) == self.t:
+                print("GRASP: completed in {} iterations".format(iteration))
                 return best
         return best
 
@@ -135,9 +134,8 @@ class SSP:
         it = 0
         L = {0}
         for x in self.S:
-            L_len = len(L)
+            it += len(L)
             L = L.union({i + x for i in L if (i + x) <= self.t})
-            it += (len(L_len) - ln) + 1
         print("dynamic: completed in {} iterations".format(it))
         return self.t in L
 
@@ -145,6 +143,7 @@ if __name__ == "__main__":
     instance = SSP()
     instance.random_yes_instance(50)
     print(instance)
+    print(instance.dynamic())
     print(instance.grasp())
 # print( instance )
 # print(instance.greedy())
