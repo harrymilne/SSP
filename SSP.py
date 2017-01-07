@@ -1,0 +1,163 @@
+from random import randint, sample, shuffle
+from itertools import chain, combinations
+from time import time
+from timeit import timeit
+
+class SSP:
+    """
+    object representing an instance of a subset sum problem
+    """
+    def __init__(self, S=[], t=0):
+        """
+        takes two arguments, S being the language and t being the target
+        """
+        self.S = S
+        self.t = t
+        self.n = len(S)
+        #
+        self.decision = False
+        self.total    = 0
+        self.selected = []
+
+    def __repr__(self):
+        return "SSP instance: S="+str(self.S)+"\tt="+str(self.t)
+    
+    def random_instance(self, n, bitlength=10):
+        """
+        generate a random instance where the max integer size is 2**bitlength-1 and length of n
+        """
+        max_n_bit_number = 2**bitlength-1
+        self.S = sorted( [ randint(0,max_n_bit_number) for i in range(n) ] , reverse=True)
+        self.t = randint(0,n*max_n_bit_number)
+        self.n = len( self.S )
+
+    def random_yes_instance(self, n, bitlength=10):
+        """
+        generate SSP instance where we know t equals a subset
+        """
+        max_n_bit_number = 2**bitlength-1
+        self.S = sorted( [ randint(0,max_n_bit_number) for i in range(n) ] , reverse=True)
+        self.t = sum( sample(self.S, randint(0,n)) )
+        self.n = len( self.S )
+
+    def try_at_random(self):
+        """
+        randomly attempt to match t to a sub set
+        """
+        candidate = []
+        total = 0
+        while total != self.t:
+            candidate = sample(self.S, randint(0,self.n))
+            total     = sum(candidate)
+            print( "Trying: ", candidate, ", sum:", total )
+
+    def power_set(self):
+        """
+        return list of all possible combinations of elements in S
+        """
+        p_set = []
+        s_len = 2**self.n - 1
+        max_bits = len(bin(s_len)) - 2
+
+        for i in range(0, s_len + 1):
+            padded_bits = format(i, '0%sb' % max_bits)
+            p_set.append([i for i, s in zip(self.S, padded_bits) if int(s)])
+
+        return p_set
+
+    def exhaustive(self):
+        """
+        exhaustively search the super set of S for t
+        """
+        S = self.power_set()
+        for e in S:
+            if sum(e) == self.t:
+                print("t found in {}".format(e))
+                return True
+        return False
+
+    def greedy(self, rand=False):
+        total = []
+        copy = self.S.copy()
+        #print(copy)
+
+        if rand:
+            shuffle(copy)
+
+        for x in copy:
+            if x > self.t:
+                copy.remove(x)
+
+        while copy and sum(total) < self.t:
+            print(total)
+            for i in copy:
+                if i + sum(total) <= self.t:
+                    total.append(i)
+                    copy.remove(i)
+                    break
+                else:
+                    copy.remove(i)
+        return (self.t - sum(total), total)
+
+    def local_search(self, subset):
+        diff = self.t - sum(subset)
+        copy = subset.copy()
+        for x in self.S:
+            for i in subset:
+                if x - i < 0:
+                    pass
+                elif x - i < diff:
+                    copy.remove(i)
+                    copy.append(x)
+                    return copy
+        return copy
+
+    def distance(self, subset):
+        s = sum(subset)
+        return self.t - s
+
+    def grasp(self):
+        best = []
+        for iteration in range(1000):
+            greedy = self.greedy(True)
+            grasp = self.local_search(greedy[1])
+            if self.distance(grasp) < self.distance(best):
+                print(f'')
+                best = grasp
+            if sum(best) == self.t:
+                return best
+        return best
+
+
+    def binary_tree(self):
+        tree = {[]:{}}
+
+
+    def dynamic(self):
+        """
+        return True or False to whether a subset sums to the target via dynamic programming
+        """
+        it = 0
+        L = {0}
+        for x in self.S:
+            L_len = len(L)
+            L = L.union({i + x for i in L if (i + x) <= self.t})
+            it += (len(L_len) - ln) + 1
+        print("dynamic: completed in {} iterations".format(it))
+        return self.t in L
+
+
+instance = SSP()
+instance.random_yes_instance(50)
+print(instance)
+print(instance.grasp())
+# print( instance )
+# print(instance.greedy())
+# print(instance.dynamic())
+
+# print("exhaustive search completed in {} seconds".format(timeit(instance.exhaustive_search, number=1)))
+#instance.try_at_random()
+# for i in range(2, 23):
+#     instance.random_yes_instance(i)
+#     print(i)
+#     print("exhaustive search completed in {} seconds".format(timeit(instance.exhaustive, number=1)))
