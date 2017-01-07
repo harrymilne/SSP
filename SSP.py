@@ -2,6 +2,7 @@ from random import randint, sample, shuffle
 from itertools import chain, combinations
 from time import time
 from timeit import timeit
+from pprint import pprint
 
 class SSP:
     """
@@ -123,8 +124,9 @@ class SSP:
                 print("GRASP: found better solution: {}".format(grasp))
                 best = grasp
             if sum(best) == self.t:
-                print("GRASP: completed in {} iterations".format(iteration))
+                print("GRASP: completed in {} iterations".format(iteration + 1))
                 return best
+        print("GRASP: found insufficient subset, {} off target".format(distance(best)))
         return best
 
     def dynamic(self):
@@ -141,10 +143,23 @@ class SSP:
 
 if __name__ == "__main__":
     instance = SSP()
-    instance.random_yes_instance(50)
-    print(instance)
-    print(instance.dynamic())
-    print(instance.grasp())
+    times = {}
+    for i in range(50, 1001, 50):
+        n = 1
+        print("--- random {} elements yes instance ---".format(i))
+        instance.random_yes_instance(50)
+        print(instance)
+        dyn_time = timeit(instance.dynamic, number=n)
+        grasp_time = timeit(instance.grasp, number=n)
+        times[i] = (round(dyn_time, 5), round(grasp_time, 5))
+        print("Dynamic: {} seconds".format(dyn_time))
+        print("GRASP: {} seconds".format(grasp_time))
+
+    print("\tDynamic   GRASP")
+    pprint(times)
+
+
+
 # print( instance )
 # print(instance.greedy())
 # print(instance.dynamic())
