@@ -27,19 +27,33 @@ class SSP:
         """
         generate a random instance where the max integer size is 2**bitlength-1 and length of n
         """
-        max_n_bit_number = 2**bitlength-1
-        self.S = sorted( [ randint(0,max_n_bit_number) for i in range(n) ] , reverse=True)
-        self.t = randint(0,n*max_n_bit_number)
-        self.n = len( self.S )
+        if n < max_n_bit_number:
+            #self.S = sorted( [ randint(0,max_n_bit_number) for i in range(n) ] , reverse=True)
+            new = randint(0, max_n_bit_number)
+            S = []
+            while len(S) < n:
+                if new not in S:
+                    S.append(new)
+                new = randint(0, max_n_bit_number)
+            self.S = sorted(S, reverse=True)
+            self.t = randint(0,n*max_n_bit_number)
+            self.n = len( self.S )
+        else:
+            raise ValueError("bitlength too short for {} size set".format(n))
 
     def random_yes_instance(self, n, bitlength=10):
         """
         generate SSP instance where we know t equals a subset
         """
-        max_n_bit_number = 2**bitlength-1
-        self.S = sorted( [ randint(0,max_n_bit_number) for i in range(n) ] , reverse=True)
+        self.random_instance(n, bitlength)
         self.t = sum( sample(self.S, randint(0,n)) )
-        self.n = len( self.S )
+
+    def random_no_instance(self, n, bitlength=10):
+        """
+        generate SSP instance that we know will be the worst case
+        """
+        self.random_instance(n, bitlength)
+        self.t = sum(self.S) + 1
 
     def try_at_random(self):
         """
@@ -126,7 +140,7 @@ class SSP:
             if sum(best) == self.t:
                 print("GRASP: completed in {} iterations".format(iteration + 1))
                 return best
-        print("GRASP: found insufficient subset, {} off target".format(distance(best)))
+        print("GRASP: found insufficient subset, {} off target".format(self.distance(best)))
         return best
 
     def dynamic(self):
@@ -138,8 +152,11 @@ class SSP:
         for x in self.S:
             it += len(L)
             L = L.union({i + x for i in L if (i + x) <= self.t})
-        print("dynamic: completed in {} iterations".format(it))
-        return self.t in L
+            if self.t in L:
+                print("dynamic: completed in {} iterations".format(it))
+                return self.t in L
+        print("dynamic: failed in {} iterations".format(it))
+        return False
 
 if __name__ == "__main__":
     instance = SSP()
@@ -147,7 +164,7 @@ if __name__ == "__main__":
     for i in range(50, 1001, 50):
         n = 1
         print("--- random {} elements yes instance ---".format(i))
-        instance.random_yes_instance(50)
+        instance.random_yes_instance(i, 15)
         print(instance)
         dyn_time = timeit(instance.dynamic, number=n)
         grasp_time = timeit(instance.grasp, number=n)
