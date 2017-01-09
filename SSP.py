@@ -27,6 +27,7 @@ class SSP:
         """
         generate a random instance where the max integer size is 2**bitlength-1 and length of n
         """
+        max_n_bit_number = 2**bitlength-1
         if n < max_n_bit_number:
             #self.S = sorted( [ randint(0,max_n_bit_number) for i in range(n) ] , reverse=True)
             new = randint(0, max_n_bit_number)
@@ -175,10 +176,10 @@ class SSP:
 if __name__ == "__main__":
     instance = SSP()
     times = {}
-    for i in range(50, 1001, 50):
+    for i in range(20, 501, 20):
         n = 1
         print("--- random {} elements yes instance ---".format(i))
-        instance.random_yes_instance(i, 15)
+        instance.random_no_instance(i,12)
         print(instance)
         dyn_time = timeit(instance.dynamic, number=n)
         grasp_time = timeit(instance.grasp, number=n)
