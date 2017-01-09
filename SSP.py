@@ -92,6 +92,9 @@ class SSP:
         return False
 
     def greedy(self, rand=False):
+        """
+        try to find a close subset of S to t
+        """
         total = []
         copy = self.S.copy()
 
@@ -113,6 +116,10 @@ class SSP:
         return (self.t - sum(total), total)
 
     def local_search(self, subset):
+        """
+        look for elements in S that would replace an element
+        in passed subset to return a closer solution
+        """
         diff = self.t - sum(subset)
         copy = subset.copy()
         for x in self.S:
@@ -126,10 +133,17 @@ class SSP:
         return copy
 
     def distance(self, subset):
+        """
+        evaluate how close a solution is to perfect
+        """
         s = sum(subset)
         return self.t - s
 
     def grasp(self):
+        """
+        use greedy along with randomisation and local_search
+        to iteratively improve on the initial found solution
+        """
         best = []
         for iteration in range(1000):
             greedy = self.greedy(True)
